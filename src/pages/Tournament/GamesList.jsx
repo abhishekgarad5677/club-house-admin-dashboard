@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Box, Button, Chip, Paper, TextField } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Paper,
+  TextField,
+  Tooltip,
+} from "@mui/material";
 import CustomBreadcrumbs from "../../components/breadcrumb/CustomBreadcrumbs";
 import { CommonTable } from "../../components/table/Table";
 import { useFormattedDate } from "../../utils/Hooks";
@@ -8,8 +17,9 @@ import TableSkeleton from "../../components/skeleton/TableSkeleton";
 import AddIcon from "@mui/icons-material/Add";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import { useNavigate } from "react-router-dom";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
-const Games = () => {
+const GamesList = () => {
   const [data, setData] = useState();
   const navigate = useNavigate();
 
@@ -30,24 +40,34 @@ const Games = () => {
     { field: "id", headerName: "ID", width: 150 },
     { field: "name", headerName: "Name", width: 250 },
     { field: "version", headerName: "Version", width: 150 },
-    { field: "playCount", headerName: "Play Count", width: 150 },
-    { field: "likeCount", headerName: "Like Count", width: 150 },
-    {
-      field: "createdAt",
-      headerName: "Created At",
-      width: 200,
-      renderCell: (params) => useFormattedDate(params?.row?.createdAt),
-    },
     {
       field: "isUnderMaintenance",
       headerName: "Under Maintenance",
       width: 200,
       renderCell: (params) =>
         params?.row?.isUnderMaintenance ? (
-          <Chip label="Yes" />
+          <Chip label="Yes" size="small" />
         ) : (
-          <Chip label="No" />
+          <Chip label="No" size="small" />
         ),
+    },
+    {
+      field: "actions",
+      headerName: "Action",
+      width: 150,
+      sortable: false,
+      renderCell: (params) => (
+        <Tooltip title="View Tournament" placement="top">
+          <IconButton
+            color="primary"
+            onClick={() =>
+              navigate(`/dashboard/game-tournament/${params.row.id}`)
+            }
+          >
+            <VisibilityIcon />
+          </IconButton>
+        </Tooltip>
+      ),
     },
   ];
 
@@ -60,13 +80,16 @@ const Games = () => {
       <CustomBreadcrumbs
         items={[
           {
-            label: "Games",
-            href: "/dashboard/games",
+            label: "Games List",
+            href: "/dashboard/games-list",
             icon: <SportsEsportsIcon fontSize="small" />,
           },
         ]}
       />
       <Paper sx={{ height: "auto", width: "100%", padding: 3 }}>
+        <Alert sx={{ mb: 2 }} severity="info">
+          Click on any game row to view its tournaments
+        </Alert>
         <Box
           display="flex"
           justifyContent="space-between"
@@ -87,7 +110,7 @@ const Games = () => {
           />
 
           {/* add category button */}
-          <Button
+          {/* <Button
             variant="contained"
             startIcon={<AddIcon />}
             sx={{
@@ -96,7 +119,7 @@ const Games = () => {
             onClick={() => navigate("/dashboard/add-games")}
           >
             Add Game
-          </Button>
+          </Button> */}
         </Box>
         {/* all games table */}
         {isLoading ? (
@@ -113,4 +136,4 @@ const Games = () => {
   );
 };
 
-export default Games;
+export default GamesList;

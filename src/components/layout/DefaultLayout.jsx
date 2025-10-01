@@ -24,9 +24,10 @@ import { Link, Route, Routes, useLocation } from "react-router-dom";
 import Dashboard from "../../pages/Dashboard/Dashboard";
 import Games from "../../pages/Games/Games";
 import AddGame from "../../pages/Games/AddGame";
-import Tournament from "../../pages/Tournament/Tournament";
-import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import AddTournament from "../../pages/Tournament/AddTournament";
+import GamesList from "../../pages/Tournament/GamesList";
+import TournamentList from "../../pages/Tournament/TournamentList";
 
 const drawerWidth = 255;
 
@@ -141,10 +142,9 @@ export default function DefaultLayout() {
     },
     {
       title: "Tournament",
-      path: "/dashboard/tournament",
+      path: "/dashboard/games-list",
       icon: <EmojiEventsIcon />,
     },
-  
   ];
 
   return (
@@ -307,7 +307,8 @@ export default function DefaultLayout() {
           <Route index path="/" element={<Dashboard />} />
           <Route path="/games" element={<Games />} />
           <Route path="/add-games" element={<AddGame />} />
-          <Route path="/tournament" element={<Tournament />} />
+          <Route path="/games-list" element={<GamesList />} />
+          <Route path="/game-tournament/:id" element={<TournamentList />} />
           <Route path="/add-tournament" element={<AddTournament />} />
         </Routes>
         <Typography

@@ -5,13 +5,19 @@ import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import AddIcon from "@mui/icons-material/Add";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { useNavigate } from "react-router-dom";
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 
-const Tournament = () => {
+const TournamentList = () => {
   const navigate = useNavigate();
   return (
     <>
       <CustomBreadcrumbs
         items={[
+          {
+            label: "Games",
+            href: "/dashboard/games-list",
+            icon: <SportsEsportsIcon fontSize="small" />,
+          },
           {
             label: "Tournament",
             href: "/dashboard/tournament",
@@ -69,4 +75,4 @@ const Tournament = () => {
   );
 };
 
-export default Tournament;
+export default TournamentList;
