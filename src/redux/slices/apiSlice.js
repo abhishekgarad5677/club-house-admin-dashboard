@@ -22,6 +22,13 @@ export const apiSlice = createApi({
         body: data,
       }),
     }),
+    getTournamentByGameId: builder.mutation({
+      query: (data) => ({
+        url: "api/Tournament/admin/getalltournamentsbygameid",
+        method: "POST",
+        body: data,
+      }),
+    }),
     // get all categories
     getAllCategories: builder.mutation({
       query: (data) => ({
@@ -37,6 +44,34 @@ export const apiSlice = createApi({
         body: data,
       }),
     }),
+    getAllTournament: builder.mutation({
+      query: (data) => ({
+        url: "api/Tournament/admin/getalltournaments",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    getRewardTierList: builder.mutation({
+      query: (data) => ({
+        url: "/api/Tournament/get-reward-tierset",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    getRewardTierInfo: builder.mutation({
+      query: (data) => ({
+        url: "/api/Tournament/get-reward-tierset-by-id",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    addRewardTier: builder.mutation({
+      query: (data) => ({
+        url: "/api/Tournament/reward-tierset",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -44,4 +79,9 @@ export const {
   useGetAllGamesMutation,
   useGetAllCategoriesMutation,
   useAddGameMutation,
+  useGetTournamentByGameIdMutation,
+  useGetAllTournamentMutation,
+  useGetRewardTierListMutation,
+  useGetRewardTierInfoMutation,
+  useAddRewardTierMutation,
 } = apiSlice;

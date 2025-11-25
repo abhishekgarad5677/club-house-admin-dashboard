@@ -26,8 +26,14 @@ import Games from "../../pages/Games/Games";
 import AddGame from "../../pages/Games/AddGame";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import AddTournament from "../../pages/Tournament/AddTournament";
-import GamesList from "../../pages/Tournament/GamesList";
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
+import RewardTier from "../../pages/RewardTier/RewardTier";
+import GameTournamentList from "../../pages/Games/GameTournamentList";
 import TournamentList from "../../pages/Tournament/TournamentList";
+import JoinBot from "../../pages/JoinBot/JoinBot";
+import RewardTierList from "../../pages/RewardTier/RewardTierList";
+import RewardTierInfo from "../../pages/RewardTier/RewardTierInfo";
 
 const drawerWidth = 255;
 
@@ -142,8 +148,18 @@ export default function DefaultLayout() {
     },
     {
       title: "Tournament",
-      path: "/dashboard/games-list",
+      path: "/dashboard/tournament-list",
       icon: <EmojiEventsIcon />,
+    },
+    {
+      title: "Join Bot",
+      path: "/dashboard/join-bot",
+      icon: <SmartToyIcon />,
+    },
+    {
+      title: "Reward Tier",
+      path: "/dashboard/reward-tier-list",
+      icon: <MilitaryTechIcon />,
     },
   ];
 
@@ -306,11 +322,15 @@ export default function DefaultLayout() {
         <Routes>
           <Route index path="/" element={<Dashboard />} />
           <Route path="/games" element={<Games />} />
+          <Route path="/tournament-list" element={<TournamentList />} />
           <Route path="/add-games" element={<AddGame />} />
-          <Route path="/games-list" element={<GamesList />} />
-          <Route path="/game-tournament/:id" element={<TournamentList />} />
+          <Route path="/game-tournament/:id" element={<GameTournamentList />} />
           <Route path="/add-tournament" element={<AddTournament />} />
-        </Routes>
+          <Route path="/reward-tier-list" element={<RewardTierList />} />
+          <Route path="/reward-tier-info/:id" element={<RewardTierInfo />} />
+          <Route path="/create-reward-tier" element={<RewardTier />} />
+          <Route path="/join-bot" element={<JoinBot />} />
+        </Routes> 
         <Typography
           variant="p"
           fontSize={12}

@@ -60,9 +60,8 @@ const Login = () => {
 
         dispatch(
           login({
-            // user: response?.data?.data,
             user: "Admin",
-            token: response?.data.data[0]?.jwtToken,
+            token: response?.data.data?.jwtToken,
           })
         );
 

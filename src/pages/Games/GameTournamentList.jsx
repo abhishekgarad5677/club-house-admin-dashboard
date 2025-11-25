@@ -1,28 +1,38 @@
 import React, { useEffect, useState } from "react";
-import { useGetAllTournamentMutation } from "../../redux/slices/apiSlice";
+import { Link, useParams } from "react-router-dom";
+import { useGetTournamentByGameIdMutation } from "../../redux/slices/apiSlice";
 import { Paper } from "@mui/material";
 import TableSkeleton from "../../components/skeleton/TableSkeleton";
 import { TableWithExport } from "../../components/table/TableWithExport";
-import { formatDateTime } from "../../utils/Hooks";
+import {
+  formatDateTime,
+  formatDateToReadableString,
+  useFormattedDate,
+} from "../../utils/Hooks";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";  
 
-const TournamentList = () => {
+const GameTournamentList = () => {
   const [postData, { isLoading, error, data: tournamentData }] =
-    useGetAllTournamentMutation();
+    useGetTournamentByGameIdMutation();
 
   const [data, setData] = useState([]);
   const [rowCount, setRowCount] = useState(0);
+  const { id } = useParams();
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 10,
   });
 
   useEffect(() => {
-    const formData = new FormData();
-    formData.append("FilterType", "lifetime");
-    formData.append("PageSize", paginationModel.pageSize);
-    formData.append("PageNumber", paginationModel.page + 1);
-    postData(formData);
-  }, []);
+    if (id) {
+      const formData = new FormData();
+      formData.append("GameId", id);
+      formData.append("FilterType", "lifetime");
+      formData.append("PageSize", paginationModel.pageSize);
+      formData.append("PageNumber", paginationModel.page + 1);
+      postData(formData);
+    }
+  }, [id, paginationModel]);
 
   useEffect(() => {
     if (tournamentData) {
@@ -31,6 +41,7 @@ const TournamentList = () => {
       setRowCount(tournamentData?.data?.totalCount);
     }
   }, [tournamentData]);
+
 
   const columns = [
     { field: "id", headerName: "ID", width: 100 },
@@ -56,6 +67,20 @@ const TournamentList = () => {
 
   return (
     <Paper sx={{ height: "auto", width: "100%", padding: 3 }}>
+      <Link
+        style={{
+          textDecoration: "none",
+          color: "#1976d2",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+        }}
+        to={"/dashboard/games"}
+      >
+        <ArrowBackIosIcon sx={{ fontSize: 14 }} />
+        back
+      </Link>
+
       {isLoading ? (
         <TableSkeleton rows={10} columns={6} />
       ) : (
@@ -72,4 +97,4 @@ const TournamentList = () => {
   );
 };
 
-export default TournamentList;
+export default GameTournamentList;

@@ -1,81 +1,112 @@
-import { Box, Paper, styled, Typography } from "@mui/material";
-import React, { useState } from "react";
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import GroupIcon from '@mui/icons-material/Group';
-import Grid from '@mui/material/Grid2';
-import Chart from "react-apexcharts";
+import React, { useEffect, useState } from "react";
+import { Box, Paper, styled, TextField, Typography } from "@mui/material";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import Grid from "@mui/material/Grid2";
 import CustomBreadcrumbs from "../../components/breadcrumb/CustomBreadcrumbs";
-
+import CustomRangeSelect from "../../utils/CustomRangeSelect";
+import DatePicker from "react-datepicker";
+import { dateFilterOptions } from "../../utils/constant";
+import DashboardSummary from "../../components/Dashboard/DashboardSummary";
 
 const Dashboard = () => {
+  const [date, setDate] = useState("today");
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [startDate, endDate] = dateRange;
 
-    const [chartData] = useState({
-        series: [44, 55, 41, 17, 15],
-        options: {
-            labels: ["A", "B", "C", "D", "E"],
-        },
-    });
+  const handleDateChange = (event) => {
+    const selectedDate = event.target.value;
+    setDate(selectedDate);
 
-    return (
-        <>
-            <CustomBreadcrumbs
-                items={[
-                    { label: "Dashboard", href: "/dashboard", icon: <DashboardIcon fontSize="small" /> }
-                ]}
+    if (selectedDate === "custom") {
+      // Store the custom date range in sessionStorage
+      sessionStorage.setItem("selectedDate", selectedDate);
+      sessionStorage.setItem("startDate", startDate);
+      sessionStorage.setItem("endDate", endDate);
+    } else {
+      // Store the selected date (e.g., "today", "yesterday", etc.)
+      sessionStorage.setItem("selectedDate", selectedDate);
+      sessionStorage.removeItem("startDate");
+      sessionStorage.removeItem("endDate");
+    }
+  };
+
+  useEffect(() => {
+    const storedDate = sessionStorage.getItem("selectedDate");
+    const storedStartDate = sessionStorage.getItem("startDate");
+    const storedEndDate = sessionStorage.getItem("endDate");
+
+    if (storedDate) {
+      setDate(storedDate); // Set the stored date to default value
+    }
+    if (storedStartDate && storedEndDate) {
+      setDateRange([new Date(storedStartDate), new Date(storedEndDate)]); // Set the date range if custom is selected
+    }
+  }, []);
+
+  return (
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <CustomBreadcrumbs
+          items={[
+            {
+              label: "Dashboard",
+              href: "/dashboard",
+              icon: <DashboardIcon fontSize="small" />,
+            },
+          ]}
+        />
+        <Box
+          sx={{
+            marginBottom: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 3,
+          }}
+        >
+          <CustomRangeSelect
+            value={date}
+            label={"Date"}
+            onChange={handleDateChange}
+            options={dateFilterOptions}
+          />
+          {date === "custom" && (
+            <DatePicker
+              maxDate={new Date()}
+              selectsRange
+              startDate={startDate}
+              endDate={endDate}
+              onChange={(update) => {
+                setDateRange(update);
+                const [start, end] = update;
+                sessionStorage.setItem("startDate", start); // Store the start date
+                sessionStorage.setItem("endDate", end); // Store the end date
+              }}
+              dateFormat="dd/MM/yyyy"
+              placeholderText="Select date range"
+              customInput={
+                <TextField
+                  size="small"
+                  fullWidth
+                  label="Custom Date Range"
+                  sx={{ width: 250 }}
+                />
+              }
             />
-            <Paper sx={{ height: "85vh", width: '100%', padding: 3 }}>
-                <Box sx={{ flexGrow: 1 }}>
-                    {/* <Grid container spacing={2}>
-                        <Grid size={4} style={{ display: "flex", justifyContent: "center" }}>
-                            <Paper elevation={2} >
-                                <Chart options={chartData.options} series={chartData.series} type="donut" width={"100%"} />
-                            </Paper>
-                        </Grid>
-                        <Grid size={8}>
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-evenly',
-                                    alignItems: 'center',
-                                    // flexWrap: 'wrap',
-                                    overflow: 'hidden',
-                                    gap: 2,
-                                    padding: 2,
-                                    '& > :not(style)': {
-                                        // m: 2,
-                                        width: 200,
-                                        height: 200,
-                                    },
-                                }}
-                            >
-                                <Paper
-                                    elevation={2}
-                                    sx={{
-                                        display: 'flex',
-                                        justifyContent: 'start',
-                                        flexDirection: 'column',
-                                        alignItems: 'center'
-                                    }}
-                                >
+          )}
+        </Box>
+      </Box>
+      <Box sx={{ height: "85vh", width: "100%" }}>
+        <DashboardSummary />
+      </Box>
+    </>
+  );
+};
 
-                                    <Box sx={{ borderRadius: '50%', padding: 2, backgroundColor: '#ccc' }}>
-                                        <GroupIcon sx={{ fontSize: 40 }} />
-                                    </Box>
-                                    <Typography variant="h6" >
-                                        Users
-                                    </Typography>
-                                </Paper>
-                                <Paper elevation={2} />
-                                <Paper elevation={2} />
-                                <Paper elevation={2} />
-                            </Box>
-                        </Grid>
-                    </Grid> */}
-                </Box>
-
-            </Paper >
-        </>
-    )
-}
-
-export default Dashboard
+export default Dashboard;
