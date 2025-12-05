@@ -22,18 +22,23 @@ import { Tooltip } from "@mui/material";
 import { ProfileAvatarMenu } from "../Avatar/ProfileAvatarMenu";
 import { Link, Route, Routes, useLocation } from "react-router-dom";
 import Dashboard from "../../pages/Dashboard/Dashboard";
-import Games from "../../pages/Games/Games";
 import AddGame from "../../pages/Games/AddGame";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import AddTournament from "../../pages/Tournament/AddTournament";
-import SmartToyIcon from '@mui/icons-material/SmartToy';
-import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
 import RewardTier from "../../pages/RewardTier/RewardTier";
 import GameTournamentList from "../../pages/Games/GameTournamentList";
 import TournamentList from "../../pages/Tournament/TournamentList";
 import JoinBot from "../../pages/JoinBot/JoinBot";
 import RewardTierList from "../../pages/RewardTier/RewardTierList";
 import RewardTierInfo from "../../pages/RewardTier/RewardTierInfo";
+import GameDetails from "../../pages/Games/GameDetails";
+import EditGame from "../../pages/Games/EditGame";
+import UserManagement from "../../pages/UserManagement/UserManagement";
+import GroupIcon from "@mui/icons-material/Group";
+import UserDetails from "../../pages/UserManagement/UserDetails";
+import Games from "../../pages/Games/Games";
 
 const drawerWidth = 255;
 
@@ -155,6 +160,11 @@ export default function DefaultLayout() {
       title: "Join Bot",
       path: "/dashboard/join-bot",
       icon: <SmartToyIcon />,
+    },
+    {
+      title: "User Management",
+      path: "/dashboard/user-management",
+      icon: <GroupIcon />,
     },
     {
       title: "Reward Tier",
@@ -321,16 +331,24 @@ export default function DefaultLayout() {
         <DrawerHeader />
         <Routes>
           <Route index path="/" element={<Dashboard />} />
-          <Route path="/games" element={<Games />} />
           <Route path="/tournament-list" element={<TournamentList />} />
-          <Route path="/add-games" element={<AddGame />} />
-          <Route path="/game-tournament/:id" element={<GameTournamentList />} />
           <Route path="/add-tournament" element={<AddTournament />} />
           <Route path="/reward-tier-list" element={<RewardTierList />} />
           <Route path="/reward-tier-info/:id" element={<RewardTierInfo />} />
           <Route path="/create-reward-tier" element={<RewardTier />} />
           <Route path="/join-bot" element={<JoinBot />} />
-        </Routes> 
+          {/* Games routes starts */}
+          <Route path="/games" element={<Games />} />
+          <Route path="/game-details/:id" element={<GameDetails />} />
+          <Route path="/add-games" element={<AddGame />} />
+          <Route path="/edit-game" element={<EditGame />} />
+          <Route path="/game-tournament/:id" element={<GameTournamentList />} />
+          {/* Games routes starts */}
+          {/* User Management routes starts */}
+          <Route path="/user-management" element={<UserManagement />} />
+          <Route path="/user-details/:id" element={<UserDetails />} />
+          {/* User Management routes ends */}
+        </Routes>
         <Typography
           variant="p"
           fontSize={12}

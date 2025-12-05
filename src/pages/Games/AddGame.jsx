@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from "react";
 import {
-  Box,
   Button,
-  FormHelperText,
-  InputAdornment,
   MenuItem,
   OutlinedInput,
   Paper,
   Select,
-  styled,
-  TextField,
   Typography,
 } from "@mui/material";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -21,6 +16,8 @@ import {
   useGetAllCategoriesMutation,
 } from "../../redux/slices/apiSlice";
 import { useForm, Controller } from "react-hook-form";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";  
+import { Link } from "react-router-dom";
 
 const AddGame = () => {
   const [data, setData] = useState([]);
@@ -43,15 +40,14 @@ const AddGame = () => {
 
   useEffect(() => {
     if (getAllCategories) {
-      setData(getAllCategories?.data[0]?.activeCategory);
+      // assuming API returns { data: { activeCategory: [...] } }
+      setData(getAllCategories?.data?.activeCategory);
     }
   }, [getAllCategories]);
 
-  // console.log(data);
   const {
     handleSubmit,
     control,
-    setValue,
     formState: { errors },
   } = useForm();
 
@@ -59,9 +55,21 @@ const AddGame = () => {
     const form = new FormData();
 
     form.append("Name", formData?.name);
-    form.append("Version", formData?.version);
     form.append("GameTutorialURL", formData?.tutorialUrl);
-    form.append("CateoryIds", formData?.category);
+
+    // formData.category is now an ARRAY of selected NAMES
+    const selectedCategoryNames = formData?.category || [];
+
+    // send as JSON array (change if your API expects something else)
+    form.append("CateoryIds", JSON.stringify(selectedCategoryNames));
+
+    form.append("Description", formData?.description || "");
+
+    if (formData?.icon instanceof File) {
+      form.append("Icon", formData?.icon);
+    } else {
+      console.error("Icon is missing or not a File");
+    }
 
     if (formData?.assetAOS instanceof File) {
       form.append("AssetBundleAOS", formData?.assetAOS);
@@ -75,23 +83,18 @@ const AddGame = () => {
       console.error("AssetBundleIOS is missing or not a File");
     }
 
-    // ✅ Correct way to log FormData:
+    // log FormData for debugging
     for (let pair of form.entries()) {
       console.log(pair[0] + ": ", pair[1]);
     }
 
-    // console.log(form);
-
-    createGame(form)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log("error", err);
-      });
-
-    // Now send the form to API (if needed)
-    // await createGame(form);
+    // createGame(form)
+    //   .then((res) => { 
+    //     console.log(res);
+    //   })
+    //   .catch((err) => {
+    //     console.log("error", err);
+    //   });
   };
 
   return (
@@ -111,22 +114,28 @@ const AddGame = () => {
         ]}
       />
       <Paper sx={{ height: "85vh", width: "100%", padding: 3 }}>
+        <Link
+          style={{
+            textDecoration: "none",
+            color: "#1976d2",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            marginBottom: 10,
+            width: 'fit-content'
+          }}
+          to={"/dashboard/games"}
+        >
+          <ArrowBackIosIcon sx={{ fontSize: 14 }} />
+          back
+        </Link>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
+            {/* Name */}
             <Grid size={6}>
               <Typography variant="subtitle1" fontWeight={"500"} gutterBottom>
                 Name
               </Typography>
-              {/* <OutlinedInput
-                name="name"
-                control={control}
-                rules={{ required: "Name is required" }}
-                render={({ field }) => (
-                  <OutlinedInput {...field} fullWidth size="small" />
-                )}
-                fullWidth
-                size="small"
-              /> */}
               <Controller
                 name="name"
                 control={control}
@@ -139,28 +148,36 @@ const AddGame = () => {
                 <p style={{ color: "red" }}>{errors.name.message}</p>
               )}
             </Grid>
+
+            {/* Icon upload */}
             <Grid size={6}>
               <Typography variant="subtitle1" fontWeight={"500"} gutterBottom>
-                Version
+                Icon
               </Typography>
-              {/* <OutlinedInput fullWidth size="small" /> */}
               <Controller
-                name="version"
+                name="icon"
                 control={control}
-                rules={{ required: "Version is required" }}
+                rules={{ required: "Icon image is required" }}
                 render={({ field }) => (
-                  <OutlinedInput {...field} fullWidth size="small" />
+                  <OutlinedInput
+                    type="file"
+                    fullWidth
+                    size="small"
+                    inputProps={{ accept: "image/*" }}
+                    onChange={(e) => field.onChange(e.target.files?.[0])}
+                  />
                 )}
               />
-              {errors.version && (
-                <p style={{ color: "red" }}>{errors.version.message}</p>
+              {errors.icon && (
+                <p style={{ color: "red" }}>{errors.icon.message}</p>
               )}
             </Grid>
+
+            {/* Game Tutorial URL */}
             <Grid size={6}>
               <Typography variant="subtitle1" fontWeight={"500"} gutterBottom>
                 Game Tutorial URL
               </Typography>
-              {/* <OutlinedInput fullWidth size="small" /> */}
               <Controller
                 name="tutorialUrl"
                 control={control}
@@ -173,44 +190,36 @@ const AddGame = () => {
                 <p style={{ color: "red" }}>{errors.tutorialUrl.message}</p>
               )}
             </Grid>
+
+            {/* Select Category (MULTI SELECT) */}
             <Grid size={6}>
               <Typography variant="subtitle1" fontWeight={"500"} gutterBottom>
                 Select Category
               </Typography>
-              {/* <Select
-                fullWidth
-                input={<OutlinedInput fullWidth size="small" />}
-                displayEmpty
-                inputProps={{ "aria-label": "Without label" }}
-                defaultValue={"default"}
-              >
-                <MenuItem value={"default"}>
-                  <em>None</em>
-                </MenuItem>
-                {data?.map((ele, index) => {
-                  return (
-                    <MenuItem key={index} value={ele?.id}>
-                      {ele?.name}
-                    </MenuItem>
-                  );
-                })}
-              </Select> */}
               <Controller
                 name="category"
                 control={control}
-                rules={{ required: "Category is required" }}
+                rules={{ required: "At least one category is required" }}
                 render={({ field }) => (
                   <Select
                     {...field}
+                    multiple
                     fullWidth
                     displayEmpty
                     input={<OutlinedInput size="small" />}
+                    value={field.value || []}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    renderValue={(selected) =>
+                      (selected || []).length === 0
+                        ? "Select categories"
+                        : (selected || []).join(", ")
+                    }
                   >
-                    <MenuItem value="default">
-                      <em>None</em>
+                    <MenuItem disabled value="">
+                      <em>Select categories</em>
                     </MenuItem>
                     {data?.map((ele, index) => (
-                      <MenuItem key={index} value={ele?.id}>
+                      <MenuItem key={index} value={ele?.name}>
                         {ele?.name}
                       </MenuItem>
                     ))}
@@ -221,11 +230,12 @@ const AddGame = () => {
                 <p style={{ color: "red" }}>{errors.category.message}</p>
               )}
             </Grid>
+
+            {/* Asset Bundle AOS */}
             <Grid size={6}>
               <Typography variant="subtitle1" fontWeight={"500"} gutterBottom>
                 Asset Bundle AOS
               </Typography>
-              {/* <OutlinedInput type="file" fullWidth size="small" /> */}
               <Controller
                 name="assetAOS"
                 control={control}
@@ -235,7 +245,7 @@ const AddGame = () => {
                     fullWidth
                     size="small"
                     type="file"
-                    onChange={(e) => field.onChange(e.target.files[0])}
+                    onChange={(e) => field.onChange(e.target.files?.[0])}
                   />
                 )}
               />
@@ -243,11 +253,12 @@ const AddGame = () => {
                 <p style={{ color: "red" }}>{errors.assetAOS.message}</p>
               )}
             </Grid>
+
+            {/* Asset Bundle IOS */}
             <Grid size={6}>
               <Typography variant="subtitle1" fontWeight={"500"} gutterBottom>
                 Asset Bundle IOS
               </Typography>
-              {/* <OutlinedInput type="file" fullWidth size="small" /> */}
               <Controller
                 name="assetIOS"
                 control={control}
@@ -257,7 +268,7 @@ const AddGame = () => {
                     type="file"
                     fullWidth
                     size="small"
-                    onChange={(e) => field.onChange(e.target.files[0])}
+                    onChange={(e) => field.onChange(e.target.files?.[0])}
                   />
                 )}
               />
@@ -265,15 +276,40 @@ const AddGame = () => {
                 <p style={{ color: "red" }}>{errors.assetIOS.message}</p>
               )}
             </Grid>
-            <Grid size={6} sx={{ mt: 2 }}>
+
+            {/* Description */}
+            <Grid size={6}>
+              <Typography variant="subtitle1" fontWeight={"500"} gutterBottom>
+                Description
+              </Typography>
+              <Controller
+                name="description"
+                control={control}
+                rules={{ required: "Description is required" }}
+                render={({ field }) => (
+                  <OutlinedInput
+                    {...field}
+                    fullWidth
+                    size="small"
+                    multiline
+                    minRows={3}
+                  />
+                )}
+              />
+              {errors.description && (
+                <p style={{ color: "red" }}>{errors.description.message}</p>
+              )}
+            </Grid>
+
+            {/* Submit */}
+            <Grid size={12} sx={{ mt: 2 }}>
               <Button
                 variant="contained"
                 color="primary"
-                // onClick={handleSubmit}
-                sx={{ width: "30%" }}
+                sx={{ width: "18%", backgroundColor: "#1E218D" }}
                 type="submit"
               >
-                Add
+                Add Game
               </Button>
             </Grid>
           </Grid>

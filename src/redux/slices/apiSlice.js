@@ -4,7 +4,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://sample-lb-51711970.ap-south-1.elb.amazonaws.com/",
+    baseUrl: "http://10.1.1.175:7000/",
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth.token; // Getting the token directly from getState
       if (token) {
@@ -14,12 +14,26 @@ export const apiSlice = createApi({
     },
   }),
   endpoints: (builder) => ({
-    // get all games
+    // games end points starts
     getAllGames: builder.mutation({
       query: (data) => ({
-        url: "api/Game/admin/getallgames",
-        method: "POST",
-        body: data,
+        url: "api/Game/all",
+        method: "GET",
+        params: data,
+      }),
+    }),
+    getGameById: builder.query({
+      query: (id) => ({
+        url: "api/Game/get-by-id",
+        method: "GET",
+        params: { id },
+      }),
+    }),
+    toggleGameMaintenance: builder.mutation({
+      query: (gameId) => ({
+        url: "api/Game/toggle-maintenance",
+        method: "PATCH", // or PUT if your backend uses that
+        body: { id: gameId }, // adjust key if backend expects { gameId: ... }
       }),
     }),
     getTournamentByGameId: builder.mutation({
@@ -29,6 +43,7 @@ export const apiSlice = createApi({
         body: data,
       }),
     }),
+    // games end points ends
     // get all categories
     getAllCategories: builder.mutation({
       query: (data) => ({
@@ -72,11 +87,58 @@ export const apiSlice = createApi({
         body: data,
       }),
     }),
+    // User management starts
+    getAllUsers: builder.mutation({
+      query: (body) => ({
+        url: "/api/UserManagement/search-users",
+        method: "POST",
+        body,
+      }),
+    }),
+    getUserProfileWallet: builder.query({
+      query: (email) => ({
+        url: "api/UserManagement/get-user-profile-wallet",
+        method: "GET",
+        params: { email },
+      }),
+    }),
+    getUserLifetimeTransactions: builder.query({
+      query: ({ emailId, pageSize = 10, nextToken = "" }) => ({
+        url: "api/UserManagement/getuserlifetimetransactions",
+        method: "GET",
+        params: {
+          emailId: emailId,
+          pageSize: pageSize,
+          ...(nextToken ? { nextToken: nextToken } : {}),
+        },
+      }),
+    }),
+    getUserTournaments: builder.query({
+      query: ({ emailId, pageSize = 10, nextToken = "" }) => ({
+        url: "api/UserManagement/get-user-tournaments",
+        method: "GET",
+        params: {
+          emailId: emailId,
+          pageSize: pageSize,
+          ...(nextToken ? { nextToken: nextToken } : {}),
+        },
+      }),
+    }),
+    updateUserBan: builder.mutation({
+      query: (emailId) => ({
+        url: "api/UserManagement/updateuserban",
+        method: "PUT",
+        body: { emailId },
+      }),
+    }),
+    // User management ends
   }),
 });
 
 export const {
   useGetAllGamesMutation,
+  useGetGameByIdQuery,
+  useToggleGameMaintenanceMutation,
   useGetAllCategoriesMutation,
   useAddGameMutation,
   useGetTournamentByGameIdMutation,
@@ -84,4 +146,9 @@ export const {
   useGetRewardTierListMutation,
   useGetRewardTierInfoMutation,
   useAddRewardTierMutation,
+  useGetAllUsersMutation,
+  useGetUserProfileWalletQuery,
+  useLazyGetUserLifetimeTransactionsQuery,
+  useLazyGetUserTournamentsQuery,
+  useUpdateUserBanMutation,
 } = apiSlice;

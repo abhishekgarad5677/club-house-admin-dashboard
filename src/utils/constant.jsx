@@ -1,4 +1,3 @@
-
 export const dateFilterOptions = [
   { label: "Today", value: "today" },
   { label: "Yesterday", value: "yesterday" },
@@ -9,4 +8,9 @@ export const dateFilterOptions = [
   { label: "Lifetime", value: "lifetime" },
   { label: "Custom", value: "custom" },
 ];
-;
+
+export const appFilterOptions = [
+  { label: "All", value: 2 },
+  { label: "Android", value: 0 },
+  { label: "Ios", value: 1 },
+];

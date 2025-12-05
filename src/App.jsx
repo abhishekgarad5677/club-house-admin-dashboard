@@ -4,6 +4,7 @@ import { Route, Routes } from "react-router-dom";
 import Login from "./pages/Login/Login";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import 'react-datepicker/dist/react-datepicker.css';
+import './App.css'
 
 const App = () => {
   return (
