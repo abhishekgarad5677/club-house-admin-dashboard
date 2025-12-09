@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Chip, Paper, TextField, Tooltip } from "@mui/material";
+import { Box, Chip, Paper, TextField, Tooltip, Button } from "@mui/material";
 import CustomBreadcrumbs from "../../components/breadcrumb/CustomBreadcrumbs";
 import { useGetAllGamesMutation } from "../../redux/slices/apiSlice"; // 👈 create this hook in apiSlice
 import TableSkeleton from "../../components/skeleton/TableSkeleton";
@@ -7,6 +7,8 @@ import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import { useNavigate } from "react-router-dom";
 import { TableWithExport } from "../../components/table/TableWithExport";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
 
 const Games = () => {
   const [data, setData] = useState([]);
@@ -162,7 +164,12 @@ const Games = () => {
     },
     {
       field: "playCount",
-      headerName: "Plays",
+      headerName: "Play Count",
+      width: 100,
+    },
+    {
+      field: "likeCount",
+      headerName: "Like Count",
       width: 100,
     },
     {
@@ -175,7 +182,15 @@ const Games = () => {
         >
           <Tooltip title="View Game Details" arrow>
             <RemoveRedEyeIcon
-              onClick={() => navigate(`/dashboard/game-details/${params.row.id}`)}
+              onClick={() =>
+                navigate(`/dashboard/game-details/${params.row.id}`)
+              }
+              sx={{ color: "#5d87ff", cursor: "pointer" }}
+            />
+          </Tooltip>
+          <Tooltip title="Edit Game Details" arrow>
+            <EditIcon
+              onClick={() => navigate(`/dashboard/edit-game/${params.row.id}`)}
               sx={{ color: "#5d87ff", cursor: "pointer" }}
             />
           </Tooltip>
@@ -237,6 +252,16 @@ const Games = () => {
             size="small"
             // hook this to backend search when needed
           />
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{
+              width: { xs: "100%", sm: "auto", backgroundColor: "#1E218D" },
+            }}
+            onClick={() => navigate("/dashboard/add-games")}
+          >
+            Create Game
+          </Button>
         </Box>
 
         {/* Table */}

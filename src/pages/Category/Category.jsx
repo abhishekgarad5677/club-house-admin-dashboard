@@ -11,7 +11,7 @@ import { useGetAllCategoriesMutation } from "../../redux/slices/apiSlice";
 
 const Category = () => {
 
-    const [data, setData] = useState();
+    const [data, setData] = useState([]);
 
     const [postCategoryData, { isLoading, error, data: categotyData }] = useGetAllCategoriesMutation();
 
@@ -28,11 +28,6 @@ const Category = () => {
     const columns = [
         { field: 'id', headerName: 'ID', width: 130 },
         { field: 'name', headerName: "Name", width: 170 },
-        { field: 'numberOfGames', headerName: 'Number of Games', width: 170 },
-        { field: 'numberOfTests', headerName: 'Number of Tests', width: 170 },
-        { field: 'ageGroup', headerName: 'Age Group', width: 170 },
-        // { field: 'games', headerName: 'Games', width: 150 },
-        // { field: 'tests', headerName: 'Tests', width: 150 },
     ];
 
     const navigate = useNavigate();
@@ -74,7 +69,7 @@ const Category = () => {
                         variant="contained"
                         startIcon={<AddIcon />}
                         sx={{
-                            width: { xs: '100%', sm: 'auto', backgroundColor: '#5D87FF' },
+                            width: { xs: '100%', sm: 'auto', backgroundColor: '#1E218D' },
                         }}
                         onClick={() => navigate('/dashboard/add-category')}
                     >

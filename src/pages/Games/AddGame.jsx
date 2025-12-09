@@ -16,7 +16,7 @@ import {
   useGetAllCategoriesMutation,
 } from "../../redux/slices/apiSlice";
 import { useForm, Controller } from "react-hook-form";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";  
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { Link } from "react-router-dom";
 
 const AddGame = () => {
@@ -28,7 +28,7 @@ const AddGame = () => {
   const [
     createGame,
     {
-      isLoading: createGameLoading0,
+      isLoading: createGameLoading,
       error: createGameError,
       data: createGameData,
     },
@@ -40,8 +40,7 @@ const AddGame = () => {
 
   useEffect(() => {
     if (getAllCategories) {
-      // assuming API returns { data: { activeCategory: [...] } }
-      setData(getAllCategories?.data?.activeCategory);
+      setData(getAllCategories?.data);
     }
   }, [getAllCategories]);
 
@@ -54,47 +53,29 @@ const AddGame = () => {
   const onSubmit = async (formData) => {
     const form = new FormData();
 
+    form.append("Id", parseInt(formData.id, 10)); // 👈 ensure integer
     form.append("Name", formData?.name);
     form.append("GameTutorialURL", formData?.tutorialUrl);
 
-    // formData.category is now an ARRAY of selected NAMES
     const selectedCategoryNames = formData?.category || [];
-
-    // send as JSON array (change if your API expects something else)
     form.append("CateoryIds", JSON.stringify(selectedCategoryNames));
-
     form.append("Description", formData?.description || "");
 
     if (formData?.icon instanceof File) {
-      form.append("Icon", formData?.icon);
-    } else {
-      console.error("Icon is missing or not a File");
+      form.append("Icon", formData.icon);
     }
-
     if (formData?.assetAOS instanceof File) {
-      form.append("AssetBundleAOS", formData?.assetAOS);
-    } else {
-      console.error("AssetBundleAOS is missing or not a File");
+      form.append("AssetBundleAOS", formData.assetAOS);
     }
-
     if (formData?.assetIOS instanceof File) {
-      form.append("AssetBundleIOS", formData?.assetIOS);
-    } else {
-      console.error("AssetBundleIOS is missing or not a File");
+      form.append("AssetBundleIOS", formData.assetIOS);
     }
 
-    // log FormData for debugging
     for (let pair of form.entries()) {
       console.log(pair[0] + ": ", pair[1]);
     }
 
-    // createGame(form)
-    //   .then((res) => { 
-    //     console.log(res);
-    //   })
-    //   .catch((err) => {
-    //     console.log("error", err);
-    //   });
+    createGame(form);
   };
 
   return (
@@ -122,7 +103,7 @@ const AddGame = () => {
             alignItems: "center",
             justifyContent: "flex-start",
             marginBottom: 10,
-            width: 'fit-content'
+            width: "fit-content",
           }}
           to={"/dashboard/games"}
         >
@@ -131,6 +112,31 @@ const AddGame = () => {
         </Link>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
+            <Grid size={6}>
+              <Typography variant="subtitle1" fontWeight={"500"} gutterBottom>
+                Game ID
+              </Typography>
+              <Controller
+                name="id"
+                control={control}
+                rules={{
+                  required: "ID is required",
+                  validate: (value) =>
+                    Number.isInteger(Number(value)) || "ID must be an integer",
+                }}
+                render={({ field }) => (
+                  <OutlinedInput
+                    {...field}
+                    fullWidth
+                    size="small"
+                    type="number"
+                    onChange={(e) => field.onChange(e.target.value)}
+                  />
+                )}
+              />
+              {errors.id && <p style={{ color: "red" }}>{errors.id.message}</p>}
+            </Grid>
+
             {/* Name */}
             <Grid size={6}>
               <Typography variant="subtitle1" fontWeight={"500"} gutterBottom>
@@ -308,8 +314,9 @@ const AddGame = () => {
                 color="primary"
                 sx={{ width: "18%", backgroundColor: "#1E218D" }}
                 type="submit"
+                disabled={createGameLoading}
               >
-                Add Game
+                {createGameLoading ? "Adding..." : "Add Game"}
               </Button>
             </Grid>
           </Grid>

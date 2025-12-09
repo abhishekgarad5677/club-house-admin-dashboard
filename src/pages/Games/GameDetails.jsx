@@ -22,6 +22,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import {
   useGetGameByIdQuery,
   useToggleGameMaintenanceMutation,
+  useToggleGameLiveMutation, // 🔹 NEW
 } from "../../redux/slices/apiSlice";
 
 // Base URL for bundles
@@ -64,12 +65,16 @@ const ViewGame = () => {
     isLoading,
     isError,
     error,
+    refetch,
   } = useGetGameByIdQuery(id, {
     skip: !id,
   });
 
   const [toggleGameMaintenance, { isLoading: maintenanceUpdating }] =
     useToggleGameMaintenanceMutation();
+
+  const [toggleGameLive, { isLoading: liveUpdating }] =
+    useToggleGameLiveMutation(); // 🔹 NEW
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
@@ -113,30 +118,29 @@ const ViewGame = () => {
   const confirmToggle = async () => {
     if (!selectedAction) return;
 
-    const { key, currentValue } = selectedAction;
-    const newValue = !currentValue;
-
-    // Optimistic UI update
-    setGame((prev) => ({
-      ...prev,
-      [key]: newValue,
-    }));
+    const { key } = selectedAction;
 
     try {
       if (key === "isUnderMaintenance") {
-        // 🔥 Call maintenance API
-        await toggleGameMaintenance(game.id).unwrap();
+        const formData = new FormData();
+        formData.append("gameId", Number(game.id));
+
+        await toggleGameMaintenance(formData);
+        await refetch();
+      } else if (key === "isLive") {
+        const formData = new FormData();
+        formData.append("gameId", Number(game.id));
+
+        // 🔹 Call live toggle API
+        await toggleGameLive(formData);
+        // 🔹 Refetch latest game state
+        await refetch();
       } else {
-        // other statuses will be wired later
-        console.log("Toggle for other status (no API yet):", key, newValue);
+        // other statuses will be wired later with their own APIs
+        console.log("Toggle for other status (no API yet):", key);
       }
     } catch (e) {
       console.error("Failed to toggle status:", e);
-      // revert on error
-      setGame((prev) => ({
-        ...prev,
-        [key]: currentValue,
-      }));
     } finally {
       handleCloseDialog();
     }
@@ -319,8 +323,9 @@ const ViewGame = () => {
                           handleToggleClick(item.key, game[item.key])
                         }
                         disabled={
-                          item.key === "isUnderMaintenance" &&
-                          maintenanceUpdating
+                          (item.key === "isUnderMaintenance" &&
+                            maintenanceUpdating) ||
+                          (item.key === "isLive" && liveUpdating)
                         }
                       >
                         {game[item.key] ? (
@@ -446,8 +451,9 @@ const ViewGame = () => {
             color="primary"
             autoFocus
             disabled={
-              selectedAction?.key === "isUnderMaintenance" &&
-              maintenanceUpdating
+              (selectedAction?.key === "isUnderMaintenance" &&
+                maintenanceUpdating) ||
+              (selectedAction?.key === "isLive" && liveUpdating)
             }
           >
             Yes

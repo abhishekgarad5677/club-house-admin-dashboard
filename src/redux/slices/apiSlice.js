@@ -4,7 +4,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://10.1.1.175:7000/",
+    baseUrl: "https://yi0mygd2qi.execute-api.ap-south-1.amazonaws.com/Prod",
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth.token; // Getting the token directly from getState
       if (token) {
@@ -30,10 +30,17 @@ export const apiSlice = createApi({
       }),
     }),
     toggleGameMaintenance: builder.mutation({
-      query: (gameId) => ({
+      query: (data) => ({
         url: "api/Game/toggle-maintenance",
-        method: "PATCH", // or PUT if your backend uses that
-        body: { id: gameId }, // adjust key if backend expects { gameId: ... }
+        method: "PATCH",
+        body: data,
+      }),
+    }),
+    toggleGameLive: builder.mutation({
+      query: (data) => ({
+        url: "api/Game/toggle-live",
+        method: "PATCH",
+        body: data,
       }),
     }),
     getTournamentByGameId: builder.mutation({
@@ -44,17 +51,25 @@ export const apiSlice = createApi({
       }),
     }),
     // games end points ends
-    // get all categories
+    // categories end points starts
     getAllCategories: builder.mutation({
       query: (data) => ({
-        url: "api/Category/admin/getallcategories",
+        url: "api/Category/get-all",
         method: "POST",
         body: data,
       }),
     }),
+    addCategory: builder.mutation({
+      query: (data) => ({
+        url: "api/Category/create",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    // categories end points ends
     addGame: builder.mutation({
       query: (data) => ({
-        url: "api/Game/admin/creategame",
+        url: "api/Game/create",
         method: "POST",
         body: data,
       }),
@@ -139,7 +154,9 @@ export const {
   useGetAllGamesMutation,
   useGetGameByIdQuery,
   useToggleGameMaintenanceMutation,
+  useToggleGameLiveMutation,
   useGetAllCategoriesMutation,
+  useAddCategoryMutation,
   useAddGameMutation,
   useGetTournamentByGameIdMutation,
   useGetAllTournamentMutation,

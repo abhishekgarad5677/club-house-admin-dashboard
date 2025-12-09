@@ -39,6 +39,9 @@ import UserManagement from "../../pages/UserManagement/UserManagement";
 import GroupIcon from "@mui/icons-material/Group";
 import UserDetails from "../../pages/UserManagement/UserDetails";
 import Games from "../../pages/Games/Games";
+import Category from "../../pages/Category/Category";
+import CategoryIcon from '@mui/icons-material/Category';
+import AddCategory from "../../pages/Category/AddCategory";
 
 const drawerWidth = 255;
 
@@ -150,6 +153,11 @@ export default function DefaultLayout() {
       title: "Games",
       path: "/dashboard/games",
       icon: <SportsEsportsIcon />,
+    },
+    {
+      title: "Category",
+      path: "/dashboard/category",
+      icon: <CategoryIcon />,
     },
     {
       title: "Tournament",
@@ -340,14 +348,18 @@ export default function DefaultLayout() {
           {/* Games routes starts */}
           <Route path="/games" element={<Games />} />
           <Route path="/game-details/:id" element={<GameDetails />} />
+          <Route path="/edit-game/:id" element={<EditGame />} />
           <Route path="/add-games" element={<AddGame />} />
-          <Route path="/edit-game" element={<EditGame />} />
           <Route path="/game-tournament/:id" element={<GameTournamentList />} />
-          {/* Games routes starts */}
+          {/* Games routes ends */}
           {/* User Management routes starts */}
           <Route path="/user-management" element={<UserManagement />} />
           <Route path="/user-details/:id" element={<UserDetails />} />
           {/* User Management routes ends */}
+          {/* category routes starts */}
+          <Route path="/category" element={<Category />} />
+          <Route path="/add-category" element={<AddCategory />} />
+          {/* category routes ends */}
         </Routes>
         <Typography
           variant="p"
