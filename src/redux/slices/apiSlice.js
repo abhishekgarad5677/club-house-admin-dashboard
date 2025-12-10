@@ -50,6 +50,18 @@ export const apiSlice = createApi({
         body: data,
       }),
     }),
+    getGameUploadFileUrls: builder.query({
+      query: ({ IconName, AosName, IosName }) => ({
+        url: "api/Game/upload-game-files-urls",
+        method: "GET",
+        params: {
+          IconName,
+          AosName,
+          IosName,
+        },
+      }),
+    }),
+
     // games end points ends
     // categories end points starts
     getAllCategories: builder.mutation({
@@ -155,6 +167,7 @@ export const {
   useGetGameByIdQuery,
   useToggleGameMaintenanceMutation,
   useToggleGameLiveMutation,
+  useLazyGetGameUploadFileUrlsQuery,
   useGetAllCategoriesMutation,
   useAddCategoryMutation,
   useAddGameMutation,

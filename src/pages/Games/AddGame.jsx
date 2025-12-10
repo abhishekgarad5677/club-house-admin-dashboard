@@ -14,6 +14,7 @@ import Grid from "@mui/material/Grid2";
 import {
   useAddGameMutation,
   useGetAllCategoriesMutation,
+  useLazyGetGameUploadFileUrlsQuery, // 👈 NEW IMPORT
 } from "../../redux/slices/apiSlice";
 import { useForm, Controller } from "react-hook-form";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
@@ -34,6 +35,10 @@ const AddGame = () => {
     },
   ] = useAddGameMutation();
 
+  // 👇 Lazy hook for upload URLs (called only on submit)
+  const [getUploadUrls, { isFetching: uploadUrlsLoading }] =
+    useLazyGetGameUploadFileUrlsQuery();
+
   useEffect(() => {
     getCategoryData({});
   }, []);
@@ -50,32 +55,101 @@ const AddGame = () => {
     formState: { errors },
   } = useForm();
 
+  // 👇 helper to upload file to S3 using pre-signed URL
+  const uploadFileToS3 = async (url, file) => {
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/octet-stream",
+      },
+      body: file,
+    });
+    if (res) {
+      console.log(res);
+    }
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("S3 upload failed", res.status, text);
+      throw new Error(`Upload failed with ${res.status}`);
+    }
+  };
+
   const onSubmit = async (formData) => {
-    const form = new FormData();
+    // 🔹 1. Basic file checks
+    const iconFile = formData?.icon;
+    const aosFile = formData?.assetAOS;
+    const iosFile = formData?.assetIOS;
 
-    form.append("Id", parseInt(formData.id, 10)); // 👈 ensure integer
-    form.append("Name", formData?.name);
-    form.append("GameTutorialURL", formData?.tutorialUrl);
-
-    const selectedCategoryNames = formData?.category || [];
-    form.append("CateoryIds", JSON.stringify(selectedCategoryNames));
-    form.append("Description", formData?.description || "");
-
-    if (formData?.icon instanceof File) {
-      form.append("Icon", formData.icon);
-    }
-    if (formData?.assetAOS instanceof File) {
-      form.append("AssetBundleAOS", formData.assetAOS);
-    }
-    if (formData?.assetIOS instanceof File) {
-      form.append("AssetBundleIOS", formData.assetIOS);
+    if (
+      !(
+        iconFile instanceof File &&
+        aosFile instanceof File &&
+        iosFile instanceof File
+      )
+    ) {
+      alert("Please select Icon, Asset Bundle AOS and Asset Bundle IOS files.");
+      return;
     }
 
-    for (let pair of form.entries()) {
-      console.log(pair[0] + ": ", pair[1]);
-    }
+    try {
+      // 🔹 2. Call your new upload-urls API
+      const urlsResponse = await getUploadUrls({
+        IconName: iconFile.name,
+        AosName: aosFile.name,
+        IosName: iosFile.name,
+      }).unwrap();
 
-    createGame(form);
+      if (!urlsResponse?.status || !urlsResponse?.data) {
+        alert("Failed to get upload URLs");
+        return;
+      }
+
+      const { iconUploadUrl, aosUploadUrl, iosUploadUrl } = urlsResponse.data;
+
+      // 🔹 3. Upload all three files to S3 using the presigned URLs
+      await Promise.all([
+        uploadFileToS3(iconUploadUrl, iconFile),
+        uploadFileToS3(aosUploadUrl, aosFile),
+        uploadFileToS3(iosUploadUrl, iosFile),
+      ]);
+
+      // 🔹 4. Build FormData exactly like before
+      const form = new FormData();
+
+      form.append("Id", parseInt(formData.id, 10)); // 👈 ensure integer
+      form.append("Name", formData?.name);
+      form.append("GameTutorialURL", formData?.tutorialUrl);
+
+      const selectedCategoryNames = formData?.category || [];
+      form.append("CategoryNames", JSON.stringify(selectedCategoryNames));
+      form.append("Description", formData?.description || "");
+
+      // if backend still expects files in create, keep these:
+      if (iconFile) {
+        form.append("IconName", iconFile.name);
+      }
+      if (aosFile) {
+        form.append("AssetBundleName", aosFile.name);
+      }
+
+      // debug log
+      for (let pair of form.entries()) {
+        console.log(pair[0] + ": ", pair[1]);
+      }
+
+      // 🔹 5. Finally call createGame
+      const result = await createGame(form).unwrap();
+
+      // optional: adjust based on your API response
+      if (result?.status ?? true) {
+        alert("Game Created Successfully!");
+      } else {
+        alert("Error: " + (result?.message || "Unknown error"));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while uploading or creating the game.");
+    }
   };
 
   return (
@@ -314,9 +388,11 @@ const AddGame = () => {
                 color="primary"
                 sx={{ width: "18%", backgroundColor: "#1E218D" }}
                 type="submit"
-                disabled={createGameLoading}
+                disabled={createGameLoading || uploadUrlsLoading}
               >
-                {createGameLoading ? "Adding..." : "Add Game"}
+                {createGameLoading || uploadUrlsLoading
+                  ? "Adding..."
+                  : "Add Game"}
               </Button>
             </Grid>
           </Grid>
